@@ -11,6 +11,6 @@ Hopefully the terminal should output "Hello <name>!"
 */
 
 int main() {
-    const char *name = ""; // put your name inside the quotes
+    const char *name = "Jay"; // put your name inside the quotes
     cout<<"Hello "<<name<<"!"<<endl;
 }
