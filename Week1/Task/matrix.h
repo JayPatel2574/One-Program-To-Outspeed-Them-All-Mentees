@@ -21,10 +21,11 @@ class Matrix {
         void displayMatrix();
         int** T();
         Matrix* multiplyMatrix(Matrix* N);
+        friend void multiply(Matrix* A, Matrix* B, Matrix* C, int start, int end);
 
         // helper function
         void set (int i, int j, int num) {
             M[i][j] = num;
         }
-
 };
+

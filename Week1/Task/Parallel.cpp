@@ -1,3 +1,5 @@
+#include <thread>
+#include <vector>
 #include "matrix.h"
 #define Loop(i,a,b) for (int i = a ; i < b ; i++)
 #define MAX_THREADS 8
@@ -45,11 +47,31 @@ int** Matrix::T(){
     return MT;
 }
 
-Matrix* Matrix::multiplyMatrix(Matrix* N) {
+   void multiply(Matrix* A, Matrix* B, Matrix* C, int start, int end) {
+    for (int i = start; i < end; i++)
+        for (int j = 0; j < B->m; j++)
+            for (int k = 0; k < A->m; k++)
+                C->M[i][j] += A->M[i][k] * B->M[k][j];
+}
+
+    Matrix* Matrix::multiplyMatrix(Matrix* N) {
     if (this->m != N->n) {
         return NULL;
     }
-    Matrix *c = new Matrix(this->n,N->m);
+    Matrix *C = new Matrix(this->n, N->m);
+
+    vector<thread> threads;
+    int rows_per_thread = this->n / MAX_THREADS;
+    int remainder_rows = this->n % MAX_THREADS;
+    for (int i = 0; i < MAX_THREADS; i++) {
+        int start_row = i * rows_per_thread;
+        int end_row = (i == MAX_THREADS - 1) ? start_row + rows_per_thread + remainder_rows : start_row + rows_per_thread;
+        threads.push_back(thread(multiply, this, N, C, start_row, end_row));
+    }
+ 
+    for (auto& th : threads) {
+        th.join();
+    }
 
     /*
     
@@ -64,8 +86,11 @@ Matrix* Matrix::multiplyMatrix(Matrix* N) {
     C[i][j] = sum over k = 0 to n2-1 {A[i][k]*B[k][j]}
 
     */
-    cout<<"STUDENT CODE NOT IMPLEMENTED!\n";
-    exit(1);
-    return c;
+/*     cout<<"STUDENT CODE NOT IMPLEMENTED!\n";
+    exit(1); */
+    return C;
 }
+ 
+
+
 
