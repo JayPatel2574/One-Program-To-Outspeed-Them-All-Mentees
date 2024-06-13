@@ -174,6 +174,11 @@ MAKE A VECTORIZED IMPLEMENTATION OF ABOVE CODE
 */
 
 //student code begin
-cout<<"Task not completed!\n";
+int32_t aA = 0x007F00CB;
+int32_t bB = 0x009B00C9;
+int32_t cC = aA + bB;
+int16_t cC1 = cC ^ 0xFFFF0000;
+int16_t cC0 = cC >> 16;
+cout<<cC0<<" "<<cC1<<endl;
 //student code end
 }
