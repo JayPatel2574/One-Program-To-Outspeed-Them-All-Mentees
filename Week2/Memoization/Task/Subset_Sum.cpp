@@ -26,19 +26,39 @@ using namespace chrono;
 */
 ll Count = 0;
 // Declare some variable here for memoization
+ll* dp;
+
 ll solution(ll* A, ll n, ll index){
     Count++; // Do not remove this line
 
     //STUDENT CODE BEGINS HERE
-    cout<<"STUDENT CODE NOT IMPLEMENTED\n";
-    exit(1);
+/*     cout<<"STUDENT CODE NOT IMPLEMENTED\n";
+    exit(1); */
 
-    return 0; // Placeholder line
+    if (n==0) {return 0;}
+    if (n==1) {
+      dp[0] = A[0];
+      return dp[0];
+      }
+    if (n==2) {
+      dp[1] = max(dp[0],A[1]);
+      return dp[1];
+    }
+    if (dp[n-1]!=0) {
+      return dp[n-1];
+    }
+    dp[n-1] = (max(A[n-1]+solution(A,n-2,n-3),solution(A,n-1,n-2)))%MOD;
+
+    return dp[n-1];
+ 
+/*     return 0; */ // Placeholder line
 }
 int main(){
     ll n;
     cin >> n;
     ll* A = new ll[n];
+    dp = new ll[n];
+    fill(dp,dp+n,0);
     Loop(i,0,n) cin >> A[i];
     auto start = high_resolution_clock::now();
     ll sum = solution(A,n,n - 1);
