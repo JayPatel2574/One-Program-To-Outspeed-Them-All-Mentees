@@ -87,10 +87,10 @@ for (int t=0; t<2; t++) {
     //first up, naive
     auto start = chrono::high_resolution_clock::now();
     for (int i=0; i<width; i++) {
-        for (int j=0; j<width; j++) {
+        for (int j=0; j<height; j++) {
             product[i][j] = 0;
             for (int k=0; k<width; k++) {
-                product[i][j] += contMatrix[i*width+k]*sparseMatrix[k][j];
+                product[i][j] += contMatrix[i*height+k]*sparseMatrix[k][j];
             }
         }
     }
@@ -103,11 +103,20 @@ for (int t=0; t<2; t++) {
             product[i][j] = 0;
         }
     }
-    //loop reorder
+/*     //loop reorder
     start = chrono::high_resolution_clock::now();
     //STUDENT CODE BEGINS HERE
     cerr<<"STUDENT CODE NOT IMPLEMENTED!\n";
-    exit(1);
+    exit(1); */
+
+for (int i = 0; i < width; i++) {
+    for (int k = 0; k < width; k++) {
+        for (int j = 0; j < height; j++) {
+            product[i][j] += contMatrix[i * height + k] * sparseMatrix[k][j];
+        }
+    }
+}
+
     //STUDENT CODE ENDS
     end = chrono::high_resolution_clock::now();
     elapsed = chrono::duration_cast<chrono::duration<double>>(end - start);
@@ -122,9 +131,9 @@ for (int t=0; t<2; t++) {
     start = chrono::high_resolution_clock::now();
     // IMPLEMENTED FOR YOU - WORST POSSIBLE
     for (int k=0; k<width; k++) {
-        for (int j=0; j<width; j++) {
+        for (int j=0; j<height; j++) {
             for (int i=0; i<width; i++) {
-                product[i][j] += contMatrix[i*width + k]*sparseMatrix[k][j];
+                product[i][j] += contMatrix[i*height + k]*sparseMatrix[k][j];
             }
         }
     }

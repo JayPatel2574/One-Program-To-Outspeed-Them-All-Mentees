@@ -27,7 +27,8 @@ using namespace chrono;
         2+2+2+3
         2+2+3+2
         2+3+2+2
-        3+2+2+2
+        3+2+
+        2+2
     * Input:
         The first input line has two integers n and x: the number of coins and the desired sum of money.
         The second line has n distinct integers c1,c2,...,c_n: the value of each coin.
@@ -36,7 +37,7 @@ using namespace chrono;
     Example
         Input:
         3 9
-        2 3 5
+        2 3 5 
     Output:
         8
     * From CSES/Dynamic_Programming/Coin_Combinations_1
@@ -61,10 +62,25 @@ ll solution_R(ll* coins, int n, ll sum){
 ll solution_M(ll* coins, int n, ll sum){
     Count_M++; // Do not remove this line
     ll N = 0;
+    if (sum == 0) {
+        dp[0] = 1;
+        return 1;
+    }
+    if (dp[sum] != 0) {
+        return dp[sum];
+    }
+    Loop(i,0,n){
+        if (sum - coins[i] < 0) {
+            dp[sum]=0;
+            break;
+        }
+        N = (N + solution_M(coins,n,sum - coins[i]))%MOD;
+    }
+    dp[sum] = N;
     // STUDENT CODE BEGINS HERE
-    cout<<"STUDENT CODE NOT IMPLEMENTED\n";
-    exit(1);
-    return N;
+/*     cout<<"STUDENT CODE NOT IMPLEMENTED\n";
+    exit(1); */
+    return dp[sum];
 }
 int main(int argc, char* argv[]){
     int choice = atoi(argv[1]);
@@ -77,7 +93,7 @@ int main(int argc, char* argv[]){
     if (choice == 1){
         auto start_R = high_resolution_clock::now();
         ll N_R = solution_R(coins,n,x);
-        auto end_R = high_resolution_clock::now();
+        auto end_R = high_resolution_clock::now(); 
         cout << N_R << "\n";
         auto elapsed_R = duration_cast<duration<double>>(end_R - start_R);
         cout << "Time spent " << elapsed_R.count() << "\n";
