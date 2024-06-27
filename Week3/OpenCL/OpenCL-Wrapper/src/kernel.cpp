@@ -10,7 +10,8 @@ kernel void add_kernel(global float* A, global float* B, global float* C) { // e
 
 kernel void mul_kernel(global float* A, global float* B, global float* C) {
 	// TASK 1 CODE BEGINS HERE
-	return;
+	const uint n = get_global_id(0);
+	C[n] = A[n]+B[n];
 	// TASK 1 CODE ENDS HERE
 }
 

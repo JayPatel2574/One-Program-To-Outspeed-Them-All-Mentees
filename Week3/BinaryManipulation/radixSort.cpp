@@ -1,4 +1,5 @@
 #include <iostream>
+#include <math.h>
 using namespace std;
 
 /*
@@ -14,10 +15,53 @@ making it suitable for sorting large datasets of integers.
 EXPECTED TIME COMPLEXITY : O(n*log(q)) where q = max(arr)
 
 */
+int max(int *arr, int size){
+    int max = arr[0];
+    for(int i =1;i<size;i++){
+        if(arr[i]>max){
+            max = arr[i];
+        }
+    }
+    int i=1;
+    while(max>pow(2,i-1)){
+        i++;
+    }
+    return i;
+}
+
+void countsort(int *arr, int size, int i,int t){
+    int count[2]={0,0};
+    int sfted[size];
+    for(int k=0;k<size;k++){
+        sfted[k]=arr[k]>>t;
+    }
+    int j=1;
+    for(int k=0;k<size;k++){
+        if(sfted[k]&j){
+            count[1]++;
+        }
+        else {
+            count[0]++;
+        }
+    }
+    int output[size];
+    count[1] += count[0];
+    for(int k=size-1;k>=0;k--){
+        output[count[(sfted[k]&j)]-1]=arr[k];
+        count[(sfted[k]&j)]--;
+    }
+    for(int k =0;k<size;k++){
+        arr[k]=output[k];
+    }
+}
 
 void radixSort (int *arr, int size) {
-    cout<<"STUDENT CODE NOT IMPLEMENTED!\n";
-    exit(1);
+    int n = max(arr,size);
+    int i=1;
+    for(int t=0; t<n;t++){
+        countsort(arr,size,i,t);
+        i= i<<1;
+    }
 }
 
 int main () {

@@ -17,7 +17,36 @@ ll naive (ll n) {
     return dp[n];
 }
 
+void multiply(ll F[2][2], ll M[2][2]) {
+    ll a = F[0][0] * M[0][0] + F[0][1] * M[1][0];
+    ll b = F[0][0] * M[0][1] + F[0][1] * M[1][1];
+    ll c = F[1][0] * M[0][0] + F[1][1] * M[1][0];
+    ll d = F[1][0] * M[0][1] + F[1][1] * M[1][1];
+
+    F[0][0] = a;
+    F[0][1] = b;
+    F[1][0] = c;
+    F[1][1] = d;
+}
+
 ll optim(ll n){
+
+    ll ans[2][2]={1,0,0,1};
+    ll m[2][2]={1,1,1,0};
+    ll i=1;
+    ll k=n-1;
+    while(k>=i){
+        if(k&i){
+            multiply(ans,m);
+        }
+            multiply(m,m);
+            i=i<<1;
+
+    }
+
+        return (ans[0][0]);
+
+
 /*
 
 STUDENT CODE BEGINS HERE, ACHIEVE A SPEEDUP OVER NAIVE IMPLEMENTATION
@@ -31,8 +60,8 @@ We expect your code to be faster (and completely inaccurate, as even naive metho
 
 */
 
-cout<<"Student code not implemented\n";
-exit(1);
+/* cout<<"Student code not implemented\n";
+exit(1); */
 
 }
 
