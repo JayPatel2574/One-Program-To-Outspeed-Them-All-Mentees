@@ -52,10 +52,29 @@ matrix::matrix(unsigned long size){
 
 
 matrix::matrix(const matrix& other) {
-    throw std::invalid_argument("COPY CONSTRUCTOR NOT IMPLEMENTED!\n"); // Not optimisable
-    data = other.data;
+/*     throw std::invalid_argument("COPY CONSTRUCTOR NOT IMPLEMENTED!\n"); // Not optimisable
+    data = other.data; */
     rows = other.rows;
     cols = other.cols;
+
+        unsigned long chunkSize = (rowNum + numThreads - 1) / numThreads; 
+
+        for (unsigned int t = 0; t < numThreads; ++t) {
+            unsigned long startRow = t * chunkSize;
+            unsigned long endRow = std::min((t + 1) * chunkSize, rowNum);
+            threads.emplace_back(this, startRow, endRow {
+                for (unsigned long i = startRow; i < endRow; ++i) {
+                    for (unsigned long j = 0; j < cols; ++j) {
+                        data[i * cols + j] = other.data[i * cols + j]; 
+                    }
+                }
+            });
+        }
+
+        for (auto& thread : threads) {
+            thread.join();
+        }
+    
 }
 
 matrix& matrix::operator=(const matrix& other) {
