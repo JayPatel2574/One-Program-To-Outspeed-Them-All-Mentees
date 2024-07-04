@@ -5,6 +5,11 @@ using namespace std;
 
 class matrix{
     public:
+
+        const unsigned int numThreads = std::thread::hardware_concurrency();
+        std::vector<std::thread> threads;
+        unsigned long chunkSize = (rowNum + numThreads - 1) / numThreads; 
+
 //==ACTUAL MATRIX================================================================================================================
         unsigned long rows; // number of rows of the matrix
 
