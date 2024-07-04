@@ -26,9 +26,30 @@ matrix::matrix(unsigned long rowNum, unsigned long colNum){
     }
 
 matrix::matrix(unsigned long size){
-    throw std::invalid_argument("1D CONSTRUCTOR NOT IMPLEMENTED!\n"); // Not optimisable
-    matrix(size,1);
+/*     throw std::invalid_argument("1D CONSTRUCTOR NOT IMPLEMENTED!\n"); // Not optimisable
+    matrix(size,1); */
+
+    rows = size;
+    cols = 1; 
+
+    const unsigned long chunkSize = (size + numThreads - 1) / numThreads;
+
+    for (unsigned int t = 0; t < numThreads; ++t) {
+        unsigned long startRow = t * chunkSize;
+        unsigned long endRow = std::min((t + 1) * chunkSize, size);
+        threads.emplace_back(this, startRow, endRow {
+            for (unsigned long i = startRow; i < endRow; ++i) {
+                data[i] = 0;
+            }
+        });
+    }
+
+    for (auto& thread : threads) {
+        thread.join();
+    }
 }
+
+
 
 matrix::matrix(const matrix& other) {
     throw std::invalid_argument("COPY CONSTRUCTOR NOT IMPLEMENTED!\n"); // Not optimisable
