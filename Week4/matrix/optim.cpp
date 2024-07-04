@@ -6,6 +6,8 @@ matrix::matrix(unsigned long rowNum, unsigned long colNum){
     rows = rowNum;
     cols = colNum;
 
+        unsigned long chunkSize = (rowNum + numThreads - 1) / numThreads; 
+
         for (unsigned int t = 0; t < numThreads; ++t) {
             unsigned long startRow = t * chunkSize;
             unsigned long endRow = std::min((t + 1) * chunkSize, rowNum);
