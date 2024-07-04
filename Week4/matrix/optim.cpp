@@ -1,8 +1,8 @@
 #include "matrix.h"
 
 matrix::matrix(unsigned long rowNum, unsigned long colNum){
-/*     throw std::invalid_argument("CONSTRUCTOR NOT IMPLEMENTED!\n"); // Not optimisable */
-    data.resize(rowNum*colNum,0);
+/*     throw std::invalid_argument("CONSTRUCTOR NOT IMPLEMENTED!\n"); // Not optimisable
+    data.resize(rowNum*colNum,0); */
     rows = rowNum;
     cols = colNum;
 
