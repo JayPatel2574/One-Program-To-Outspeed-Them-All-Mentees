@@ -78,12 +78,29 @@ matrix::matrix(const matrix& other) {
 }
 
 matrix& matrix::operator=(const matrix& other) {
-    throw std::invalid_argument("EQUALITY OPERATOR NOT IMPLEMENTED!\n"); // Not optimisable
+/*     throw std::invalid_argument("EQUALITY OPERATOR NOT IMPLEMENTED!\n"); // Not optimisable */
     // Allocate new resource
     rows = other.rows;
     cols = other.cols;
-    data = other.data;
+/*     data = other.data; */
+        unsigned long chunkSize = (rowNum + numThreads - 1) / numThreads; 
 
+        for (unsigned int t = 0; t < numThreads; ++t) {
+            unsigned long startRow = t * chunkSize;
+            unsigned long endRow = std::min((t + 1) * chunkSize, rowNum);
+            threads.emplace_back(this, startRow, endRow {
+                for (unsigned long i = startRow; i < endRow; ++i) {
+                    for (unsigned long j = 0; j < cols; ++j) {
+                        data[i * cols + j] = other.data[i * cols + j]; 
+                    }
+                }
+            });
+        }
+
+        for (auto& thread : threads) {
+            thread.join();
+        }
+        
     return *this;
 }
 
