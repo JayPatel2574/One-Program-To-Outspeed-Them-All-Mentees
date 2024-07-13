@@ -7,8 +7,7 @@ using namespace std;
 class matrix{
     public:
 
-        const unsigned int numThreads = std::thread::hardware_concurrency();
-        std::vector<std::thread> threads;
+
 
 //==ACTUAL MATRIX================================================================================================================
         unsigned long rows; // number of rows of the matrix
