@@ -10,7 +10,8 @@ LinearRegression::LinearRegression(uint64_t D){
 }
 
 double LinearRegression::l2loss(matrix X, matrix Y){
-    matrix Y_pred = matmul(X,weights) + bias;
+    matrix Y_pred(X.shape().first,1);
+    Y_pred = matmul(X,weights) + bias;
     __size d1 = Y.shape(), d2 = Y_pred.shape();
     if (d1 != d2){
         throw std::invalid_argument("Cannot compute loss of vectors with dimensions ( "+to_string(d1.first)+" , "
@@ -18,11 +19,18 @@ double LinearRegression::l2loss(matrix X, matrix Y){
     }
     double loss = 0;
     // Compute the mean squared loss as defined in README.md
+    uint64_t n = Y.shape().first;
+    for(uint64_t i=0 ; i<n; ++i){
+        double z = Y_pred(i,0) - Y(i,0);
+        loss += pow(z,2);
+    }
+    loss = loss/double(n);
     return loss;
 }
 
 pair<matrix, double> LinearRegression::l2lossDerivative(matrix X, matrix Y){
-    matrix Y_pred = matmul(X,weights) + bias;
+    matrix Y_pred(X.shape().first,1);
+    Y_pred = matmul(X,weights) + bias;
     __size d1 = Y.shape(), d2 = Y_pred.shape();
     if (d1 != d2){
         throw std::invalid_argument("Cannot compute loss derivative of vectors with dimensions ( "+to_string(d1.first)+" , "
@@ -30,13 +38,25 @@ pair<matrix, double> LinearRegression::l2lossDerivative(matrix X, matrix Y){
     }
     //Compute gradients as defined in README.md
     matrix dw(d,1);
-    double db; 
+    double db;
+    uint64_t n = Y.shape().first;
+    for(uint64_t i=0; i<n ; ++i){
+        double z = Y_pred(i,0) - Y(i,0);
+        db += z;
+        for(uint64_t j =0; j<d ; ++j){
+            dw(j,0) += z*X(i,j);
+        }
+        
+    }
+    db = db*(double(2)/n);
+    dw = dw*(double(2)/n);
     return {dw,db};
 }
 
 matrix LinearRegression::predict(matrix X){
-    matrix Y_pred(X.shape().first,0);
+    matrix Y_pred(X.shape().first,1);
     // Using the weights and bias, find the values of y for every x in X
+    Y_pred = matmul(X,weights) + bias;
     return Y_pred;
 }  
 
@@ -46,10 +66,20 @@ void LinearRegression::GD(matrix X, matrix Y,double learning_rate, uint64_t limi
     train_loss.PB(loss);
     uint64_t iteration = 0;
     max_iterations = limit;
+
     while (fabs(loss - old_loss) > epsilon && iteration < max_iterations){
         // Calculate the gradients and update the weights and bias correctly. Do not edit anything else 
         if (iteration %100 == 0) train_loss.PB(loss);
         iteration++;
+        
+        auto result = l2lossDerivative(X,Y);
+        double db=result.second;
+        matrix dw=result.first;
+        weights = weights - eta*dw;
+        bias = bias - eta*db;
+
+        old_loss = loss;
+        loss = l2loss(X,Y);
     }
 }
 
@@ -72,7 +102,8 @@ void LinearRegression::train(matrix X,matrix Y,double learning_rate, uint64_t li
 }
 
 void LinearRegression::test(matrix X,matrix Y){
-    matrix Y_pred = predict(X);
+    matrix Y_pred(X.shape().first,1);   
+    Y_pred = predict(X);
     uint64_t n = X.shape().first;
     matrix Y_closed = matmul(X,weights_);
     cout << "Predictions(GD) \t Predictions(C) \t True Value\n"; 
@@ -86,7 +117,14 @@ void LinearRegression::test(matrix X,matrix Y){
 double LinearRegression::accuracy(matrix Y_pred, matrix Y){
     double acc = 0; 
     // Compute the accuracy of the model
-    return acc;
+    double z=0;
+    uint64_t n = Y.shape().first;
+    for(uint64_t i = 0; i<n ; ++i){
+        z = float(abs(Y_pred(i,0)-Y(i,0)))/Y(i,0);
+        acc += z;
+    }
+    acc = acc/double(n);
+    return (1-acc);
 }
 
 pair<pair<matrix, matrix>, pair<matrix, matrix>> test_train_split(matrix X, matrix Y, float ratio) {

@@ -10,13 +10,18 @@ LogisticRegression::LogisticRegression(uint64_t D){
 }
 
 matrix LogisticRegression::sigmoid(matrix z){
-    matrix g = 1.0*ones(z.rows,1);
-    // Implement sigmoid function here as defined in README.md    
+    matrix g(z.rows,1);
+    g = 1.0*ones(z.rows,1);
+    // Implement sigmoid function here as defined in README.md
+    for(uint64_t i =0; i<z.rows;++i){
+        g(i,0) = 1/(1+double(exp(double(z(i,0)))));
+    }    
     return g;
 }
 
 double LogisticRegression::logisticLoss(matrix X, matrix Y){
-    matrix Y_pred = sigmoid((matmul(X,weights) + bias));
+    matrix Y_pred(X.shape().first,1);
+    Y_pred = sigmoid((matmul(X,weights) + bias));
     __size d1 = Y.shape(), d2 = Y_pred.shape();
     if (d1 != d2){
         throw std::invalid_argument("Cannot compute loss of vectors with dimensions ( "+to_string(d1.first)+" , "
@@ -24,11 +29,17 @@ double LogisticRegression::logisticLoss(matrix X, matrix Y){
     }
     double loss = 0;
     // Compute the log loss as defined in README.md
+    uint64_t n = Y.shape().first;
+    for(uint64_t i=0 ; i<n; ++i){
+        loss = loss -(Y(i,0)*double(log(Y_pred(i,0)))+(1-Y(i,0))*double(log(1-Y_pred(i,0))));
+    }
+    loss = loss/double(n);    
     return loss;
 }
 
 pair<matrix, double> LogisticRegression::lossDerivative(matrix X, matrix Y){
-    matrix Y_pred = sigmoid((matmul(X,weights) + bias));
+    matrix Y_pred(X.shape().first,1);
+    Y_pred = sigmoid((matmul(X,weights) + bias));
     __size d1 = Y.shape(), d2 = Y_pred.shape();
     if (d1 != d2){
         throw std::invalid_argument("Cannot compute loss derivative of vectors with dimensions ( "+to_string(d1.first)+" , "
@@ -37,13 +48,32 @@ pair<matrix, double> LogisticRegression::lossDerivative(matrix X, matrix Y){
     //Compute gradients as defined in README.md
     matrix dw(d,1);
     double db; 
+    uint64_t n = Y.shape().first;
+    for(uint64_t i=0; i<n ; ++i){
+        double z = Y_pred(i,0) - Y(i,0);
+        db += z;
+        for(uint64_t j =0; j<d ; ++j){
+            dw(j,0) += z*X(i,j);
+        }    
+    }
+    db = db*(double(2)/n);
+    dw = dw*(double(2)/n);    
     return {dw,db};
 }
 
 matrix LogisticRegression::predict(matrix X){
-    matrix Y_pred(X.shape().first,0);
+    matrix Y_pred3(X.shape().first,1);
     // Using the weights and bias, find the values of y for every x in X
-    return Y_pred;
+    Y_pred3 = sigmoid((matmul(X,weights) + bias));
+    for(uint64_t i=0; i<X.shape().first; ++i){
+        if(Y_pred3(i,0)>=0.5){
+            Y_pred3(i,0)=1;
+        }
+        else {
+            Y_pred3(i,0)=0;
+        }
+    }
+    return Y_pred3;
 }  
 
 void LogisticRegression::GD(matrix X, matrix Y,double learning_rate, uint64_t limit){
@@ -52,10 +82,20 @@ void LogisticRegression::GD(matrix X, matrix Y,double learning_rate, uint64_t li
     train_loss.PB(loss);
     uint64_t iteration = 0;
     max_iterations = limit;
+
     while (fabs(loss - old_loss) > epsilon && iteration < max_iterations){
         // Calculate the gradients and update the weights and bias correctly. Do not edit anything else 
         if (iteration %100 == 0) train_loss.PB(loss);
         iteration++;
+
+        auto result = lossDerivative(X,Y);
+        double db=result.second;
+        matrix dw=result.first;
+        weights = weights + eta*dw;
+        bias = bias + eta*db;
+
+        old_loss = loss;
+        loss = logisticLoss(X,Y);
     }
 }
 
@@ -68,7 +108,8 @@ void LogisticRegression::train(matrix X,matrix Y,double learning_rate, uint64_t 
 }
 
 void LogisticRegression::test(matrix X,matrix Y){
-    matrix Y_pred = predict(X);
+    matrix Y_pred(X.shape().first,1);
+    Y_pred = predict(X);
     uint64_t n = X.shape().first;
     cout << "Predictions(GD) \t True Value\n"; 
     for (uint64_t i = 0 ; i < n ; i++){
@@ -81,6 +122,13 @@ void LogisticRegression::test(matrix X,matrix Y){
 double LogisticRegression::accuracy(matrix Y_pred, matrix Y){
     double acc = 0;
     // Compute the accuracy of the model
+    uint64_t j = 0; 
+    for(uint64_t i=0; i<Y.shape().first; ++i){
+        if(Y_pred(i,0)==Y(i,0)){
+            j++;
+        }
+    }
+    acc = float(j)/Y.shape().first;
     return acc;
 }
 
