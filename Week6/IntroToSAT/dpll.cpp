@@ -21,8 +21,8 @@ class dpll {
     uint numVariables;
     uint numClauses;
     vector<vector<int>> clauses;
-    bool unitProp (vector<int> partialModel);
-    bool doPll (vector<int> partialModel);
+    bool unitProp (vector<int>& partialModel);
+    bool doPll (vector<int>& partialModel);
     
     public:
     vector<int> finalModel;
@@ -64,7 +64,7 @@ void dpll::getInput () {
     }
 }
 
-bool dpll::unitProp (vector<int> partialModel) {
+bool dpll::unitProp (vector<int>& partialModel) {
 /*
 
 Implement unit propogation!
@@ -83,19 +83,97 @@ while (true) {
 }
 
 */
+
+    while (true) {
+        bool unitClauseFound = false;
+        int unitClauseCounter = 0;
+        for (int i=0 ; i<numClauses ; ++i) {
+            int undecidedCount = 0;
+            int undecidedVar = 0;
+            bool clauseIsTrue = false;
+            
+            for (int j=0 ; j<clauses[i].size() ; ++j ) {
+                if (partialModel[abs(clauses[i][j])] == (clauses[i][j] > 0 ? TRUE : FALSE)) {
+                    clauseIsTrue = true;
+                    break;
+                }
+            }
+
+            if(clauseIsTrue){
+                continue;
+            }            
+
+            for (int j=0 ; j<clauses[i].size() ; ++j ) {
+                if (partialModel[abs(clauses[i][j])] == UNDEFINED) {
+                    undecidedCount++;
+                    undecidedVar = clauses[i][j];
+                }
+            }
+            if (undecidedCount == 1) {
+                partialModel[abs(undecidedVar)] = (undecidedVar > 0) ? TRUE : FALSE;
+                unitClauseFound = true;
+                unitClauseCounter++;
+                }
+            
+        }
+        if (unitClauseCounter == 0){
+            break;
+        }
+        if (!unitClauseFound) {
+            break;
+        }
+        if(unitClauseCounter>0){
+            for (int i=0 ; i<numClauses ; ++i) {
+                bool clauseTrue = false;
+                for (int j=0 ; j<clauses[i].size() ; ++j ) {
+                    if (partialModel[abs(clauses[i][j])] == (clauses[i][j] > 0 ? TRUE : FALSE)) {
+                        clauseTrue = true;
+                        break;
+                    }
+                }
+                if (!clauseTrue) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;      
 }
 
-bool dpll::doPll (vector<int> partialModel) {
+bool dpll::doPll (vector<int>& partialModel) {
 
-/*
 
-Implement the dpll algorithm
+
+/* Implement the dpll algorithm
 unitProp(partialModel)
 if (formula is SAT) {
     finalModel = partialModel;
     return true;
+} */
+
+if(!unitProp(partialModel)){
+    return false;
 }
-else {
+    bool SAT2=true;
+    for(uint i=0; i<numClauses; ++i){
+        bool SAT1 = false; 
+        for(uint j=0; j<clauses[i].size(); ++j){
+            if ( partialModel[abs(clauses[i][j])] == (clauses[i][j]>0 ? TRUE : FALSE ) ){
+                SAT1 = true;
+                break;
+            }
+        }
+        if (!SAT1){
+            SAT2 = false;
+            break;
+        }
+    }
+    if (SAT2){
+        finalModel = partialModel;
+        return true;    
+    }
+
+/* else {
     if (there exists variable x, partialModel[x] == UNDECIDED) {
         posMod = partialModel;
         posMod[x] = 1;
@@ -106,9 +184,23 @@ else {
     else {
         return false;
     }
-}
+} */
 
-*/
+    else{
+        for(uint x=1; x<=numVariables; ++x){
+            if(partialModel[x] == UNDEFINED){
+                vector<int> Mod = partialModel;
+                for(int j=0; j<2; ++j){
+                    Mod[x]=FALSE;
+                    if(doPll(Mod)){
+                        return true;
+                    }
+                    Mod[x]=TRUE;
+                }
+            }
+        }
+        return false;
+    }
 
 }
 
@@ -123,7 +215,7 @@ int main () {
     d.getInput();
 
     if (d.solve()) {
-        cout<<"TRUE\n";
+        cout<<"SAT\n";
         for (int i=1; i<d.finalModel.size(); i++) {
             cout<<i<<" : "<<d.finalModel[i]<<endl;
         }
