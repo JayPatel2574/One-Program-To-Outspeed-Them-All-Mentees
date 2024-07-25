@@ -30,4 +30,36 @@ int main() {
         cin>>a>>b;
         adjacencyList.push_back(make_pair(a,b));
     }
+
+    vector<int> colors(numNodes, -1);
+
+    for (int i = 0; i < numNodes; i++) {
+        unordered_set<int> usedColors;
+        for (const auto& edge : adjacencyList) {
+            int u = edge.first; 
+            int v = edge.second; 
+
+            if (u == i) {
+                if (colors[v] != -1) {
+                    usedColors.insert(colors[v]);
+                }
+            } else if (v == i) {
+                if (colors[u] != -1) {
+                    usedColors.insert(colors[u]);
+                }
+            }
+        }   
+        
+    for (int c = 0; c < numNodes; c++) {
+            if (usedColors.find(c) == usedColors.end()) {
+                colors[i] = c;
+                break;
+            }
+        }
+    }
+
+    int maxColor = *max_element(colors.begin(), colors.end());
+    cout << "Minimum number of colors needed: " << maxColor + 1 << endl;
+
+    return 0;    
 }

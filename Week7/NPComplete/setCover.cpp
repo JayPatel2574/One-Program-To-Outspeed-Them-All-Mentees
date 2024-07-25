@@ -1,5 +1,6 @@
 #include "../SATSolver/SATsolver.h"
 #include <iostream>
+#include <unordered_set>
 using namespace std;
 
 /*
@@ -12,37 +13,63 @@ Either solve this in polynomial time OR use the SAT solver
 
 */
 
-int main () {
+int main() {
     int lengthOfSet;
-    cout<<"Enter length of set : \n";
-    cin>>lengthOfSet;
+    /* cout << "Enter length of set: "; */
+    cin >> lengthOfSet;
+
     vector<int> V;
-    cout<<"Enter set : \n";
-    for (int i=0; i<lengthOfSet; i++) {
+    /* cout << "Enter set: "; */
+    for (int i = 0; i < lengthOfSet; i++) {
         int a;
-        cin>>a;
+        cin >> a;
         V.push_back(a);
     }
+
     int numSubSets;
-    cout<<"Enter number of subsets : \n";
-    cin>>numSubSets;
+    /* cout << "Enter number of subsets: "; */
+    cin >> numSubSets;
+
     vector<vector<int>> S;
-    for (int i=0; i<numSubSets; i++) {
+    for (int i = 0; i < numSubSets; i++) {
         int lengthOfSubset;
-        cout<<"Enter length of subset "<<i<<" : \n";
-        cin>>lengthOfSubset;
-        cout<<"Enter subset "<<i<<" : \n";
+        /* cout << "Enter length of subset " << i << ": "; */
+        cin >> lengthOfSubset;
+
+        /* cout << "Enter subset " << i << ": "; */
         vector<int> t;
-        for (int j=0; j<lengthOfSubset; j++) {
+        for (int j = 0; j < lengthOfSubset; j++) {
             int x;
-            cin>>x;
+            cin >> x;
             t.push_back(x);
         }
         S.push_back(t);
     }
 
-    cout<<"Enter k : \n";
+    /* cout << "Enter k: "; */
     int k;
-    cin>>k;
+    cin >> k;
 
+    unordered_set<int> selectedSubsets;
+
+    for (int i = 0; i < k && i < numSubSets; i++) {
+        selectedSubsets.insert(i);
+    }
+
+    unordered_set<int> unionSet;
+    for (int idx : selectedSubsets) {
+        for (int elem : S[idx]) {
+            unionSet.insert(elem);
+        }
+    }
+
+    bool existsSolution = (unionSet == unordered_set<int>(V.begin(), V.end()));
+
+    if (existsSolution) {
+        cout << "Solution exists!" << endl;
+    } else {
+        cout << "No solution exists." << endl;
+    }
+
+    return 0;
 }
