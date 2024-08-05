@@ -368,6 +368,79 @@ t <-> (t1 -> t2) = (-t or (t1->t2)),(t or -(t1->t2)) = (-t or -t1 or t2),(t or -
 t <-> (t1 <-> t2) = (-t or -t1 or t2),(-t or t1 or -t2),(t or t1 or t2),(t or -t1 or -t2)
 
 */
+if(F->type==VARIABLE){
+    Variable t;
+    t = F->var;
+    if(variables.find(t)==variables.end()){
+        variables.emplace(t,counterVar);
+        counterVar++;
+    }
+    return t;
+}
+else if(F->type==AND){
+    Variable t1=convertFormula(F->left);
+    Variable t2 = convertFormula(F->right);
+    Variable t;
+    t.name='(' + t1.name + "^" + t2.name + ")";
+    variables.emplace(t,counterVar);
+    counterVar++;
+
+    clauses.push_back({-variables[t],variables[t1]});
+    clauses.push_back({-variables[t],variables[t2]});
+    clauses.push_back({variables[t],-variables[t1],-variables[t2]});
+    return t;
+}
+else if(F->type==OR){
+    Variable t1=convertFormula(F->left);
+    Variable t2 = convertFormula(F->right);
+    Variable t;
+    t.name='(' + t1.name + "v" + t2.name + ")";
+    variables.emplace(t,counterVar);
+    counterVar++;
+
+    clauses.push_back({variables[t],-variables[t1]});
+    clauses.push_back({variables[t],-variables[t2]});
+    clauses.push_back({-variables[t],variables[t1],variables[t2]});
+    return t;
+}
+else if(F->type==NOT){
+    Variable t1 = convertFormula(F->left);
+    Variable t;
+    t.name="¬(" + t1.name+")";
+    variables.emplace(t,counterVar);
+    counterVar++;
+
+    clauses.push_back({variables[t],variables[t1]});
+    clauses.push_back({-variables[t],-variables[t1]});
+    return t;
+}
+else if(F->type==IF){
+    Variable t1=convertFormula(F->left);
+    Variable t2 = convertFormula(F->right);
+    Variable t;
+    t.name='(' + t1.name + "->" + t2.name + ")";
+    variables.emplace(t,counterVar);
+    counterVar++;
+
+    clauses.push_back({variables[t],variables[t1]});
+    clauses.push_back({variables[t],-variables[t2]});
+    clauses.push_back({-variables[t],-variables[t1],variables[t2]});
+    return t;
+}
+else if(F->type==IFF){
+    Variable t1=convertFormula(F->left);
+    Variable t2 = convertFormula(F->right);
+    Variable t;
+    t.name='(' + t1.name + "<->" + t2.name + ")";
+    variables.emplace(t,counterVar);
+    counterVar++;
+
+    clauses.push_back({variables[t],variables[t1],variables[t2]});
+    clauses.push_back({variables[t],-variables[t2],-variables[t1]});
+    clauses.push_back({-variables[t],-variables[t1],variables[t2]});
+    clauses.push_back({-variables[t],variables[t1],-variables[t2]});
+    return t;
+}   
 Variable t; // delete this lol
 return t; // delete this lol
 }
