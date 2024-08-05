@@ -3,6 +3,7 @@
 #include <immintrin.h>
 #include <chrono>
 #include <bits/stdc++.h>
+#include <cmath> 
 using namespace std;
 
 #define MAX 10000000
@@ -75,8 +76,32 @@ HINT : USE SIMD INSTRUCTIONS, YOU MAY FIND SOMETHING BEAUTIFUL ONLINE. THEN USE 
 
 */
 
-    cout<<"Student code not implemented\n";
-    exit(1);
+    for (int i = 0; i < n; i += 4) {
+        __m128 a_vec = _mm_loadu_ps(&A[i]);
+        __m128 inv_sqrt_vec = _mm_rsqrt_ps(a_vec);
+        _mm_storeu_ps(&B[i], inv_sqrt_vec);
+    }
+
+    for (int i=0; i<n; i++) {
+        B[i] = exp(-B[i]);
+    }
+    
+
+    // Compute the sum of B using SIMD
+    __m128 sum = _mm_setzero_ps();
+    for (int i = 0; i < n; i += 4) {
+        __m128 b_vec = _mm_loadu_ps(&B[i]);
+        sum = _mm_add_ps(sum, b_vec);
+    }
+
+    // Normalize B using SIMD and apply softmax
+    for (int i = 0; i < n; i += 4) {
+        __m128 b_vec = _mm_loadu_ps(&B[i]);
+        b_vec = _mm_div_ps(b_vec, sum);
+    }
+
+/*     cout<<"Student code not implemented\n";
+    exit(1); */
 
 }
 
