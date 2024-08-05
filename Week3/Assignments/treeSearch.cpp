@@ -2,6 +2,7 @@
 #include <thread>
 #include <xmmintrin.h>
 #include <chrono>
+#include <cmath>
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -32,6 +33,7 @@ private:
     int n;
     vector<node *> listOfNodes;
 public:
+    vector<node *> listforme = listOfNodes; //added extra variable for me
     node* root;
     void addConnection (node *a, node *b) { // adds b as child of a
         a->children.push_back(b);
@@ -83,6 +85,18 @@ string naiveSearch (tree &T, int k) {
     return "\0";
 }
 
+int Find(unsigned long start, unsigned long end, vector<node*> q,int k){
+    for(int i=start; i<end; ++i){
+                      
+        node *tmp = q[i];
+                
+        if (tmp->value == k) { // found it!
+            return (i+1);
+        }    
+    }    
+    return 0;
+}
+
 string optim(tree &T, int k) {
 /*
 
@@ -91,10 +105,48 @@ YOU MAY EDIT THIS FILE HOWEVER YOU WANT (as long as you don't touch main or naiv
 HINT : USE MULTITHREADING TO SEARCH IN SUBTREES THEN RETURN THE MOMENT U FIND IT
 (Note we do not expect to see a speedup for low values of n, but for n > 10000)
 
-*/
+*/  
+    
+    vector<node*> q = T.listforme;
+    
+    int tempNo;
 
-    cout<<"Student code not implemented\n";
-    exit(1);
+    long unsigned int n=T.getSize();
+
+    const unsigned int numThreads = std::thread::hardware_concurrency();
+    std::vector<std::thread> threads; 
+    unsigned long chunkSize = (n + numThreads - 1) / numThreads;  
+
+    for (unsigned long t = 0; t < numThreads; ++t) {
+        unsigned long start = t * chunkSize;
+        unsigned long end = std::min((t + 1) * chunkSize, n);
+        threads.push_back(thread(Find, start, end, q, k));
+        if (Find(start,end,q,k)){
+            tempNo = Find(start,end,q,k) - 1;
+        } 
+    }
+    for (auto& thread : threads) {
+        thread.join();
+    }
+    
+    node *temp = q[tempNo];
+    vector<node*> seq;
+    seq.push_back(temp);
+    node *u = temp->parent;
+    while (u != NULL) {
+        seq.push_back(u);
+        u = u->parent;
+    }
+    string t;
+    for (int i=seq.size() - 1; i >= 0; i--) {
+        t += seq[i]->bit;
+    }
+    return t;
+
+    return "\0";
+
+/*     cout<<"Student code not implemented\n";
+    exit(1); */
 
 }
 
